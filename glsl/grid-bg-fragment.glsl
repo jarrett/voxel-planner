@@ -34,4 +34,13 @@ void main() {
     vec4(1.0, 1.0, 1.0, 1.0), // Background color
     smoothstep(0.0, 0.005, minDist)
   );
+  
+  gl_FragColor = mix(
+    vec4(1.0, 0.0, 0.0, 1.0),
+    gl_FragColor,
+    smoothstep(0.0, 0.05, distance(
+      vPosition,
+      vec2(0.0, 0.0)
+    ))
+  );
 }

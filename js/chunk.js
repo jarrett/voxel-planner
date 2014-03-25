@@ -42,7 +42,7 @@ Chunk.atCoord = function(chunks, x, y, z) {
 
 // Writes to arrays in client memory, not on the GPU. Write the indices for a triangle strip.
 Chunk.prototype.bufferFace = function(attribData, indexData, nx, ny, nz, x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3) {
-  var i = attribData.length / 6;
+  var i = attribData.length / 6; // 6 scalar values per vertex
   attribData.push(
     x0, y0, z0, nx, ny, nz,
     x1, y1, z1, nx, ny, nz,
@@ -70,7 +70,7 @@ Chunk.ensureExistsAtCoord = function(chunks, x, y, z) {
 
 
 // Be sure to clear, set the viewport, and use the shader program before calling this.
-Chunk.prototype.draw = function(gl, attribIndices, camera) {
+Chunk.prototype.draw = function(gl, attribIndices, projection, view) {
   if (!this.attribBuffer || !this.indexBuffer) {
     throw(
       'Expected this.attribBuffer and this.indexBuffer to be initialized, but at' +
@@ -78,7 +78,8 @@ Chunk.prototype.draw = function(gl, attribIndices, camera) {
     );
   }
   
-  gl.uniformMatrix4fv(attribIndices.uCamera, false, camera);
+  gl.uniformMatrix4fv(attribIndices.uProjection, false, projection);
+  gl.uniformMatrix4fv(attribIndices.uView, false, view);
   
   gl.bindBuffer(gl.ARRAY_BUFFER, this.attribBuffer);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);

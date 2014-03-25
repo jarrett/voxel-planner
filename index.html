@@ -7,11 +7,13 @@
     <script type="text/javascript" src="/js/gl-matrix.js"></script>
     <script type="text/javascript" src="/js/model.js"></script>
     <script type="text/javascript" src="/js/chunk.js"></script>
+    <script type="text/javascript" src="/js/slice.js"></script>
     <script type="text/javascript" src="/js/init-gl.js"></script>
     <script type="text/javascript" src="/js/shaders.js"></script>
     <script type="text/javascript" src="/js/3d-viewport.js"></script>
     <script type="text/javascript" src="/js/3d-viewport-events.js"></script>
     <script type="text/javascript" src="/js/2d-viewports.js"></script>
+    <script type="text/javascript" src="/js/2d-viewport-events.js"></script>
     <script type="text/javascript" src="/js/palette.js"></script>
     <script type="text/javascript" src="/js/init.js"></script>
     
@@ -19,10 +21,22 @@
   </head>
   <body>
     <div id="canvases">
-      <canvas id="top-left" width="1200" height="660"></canvas>
-      <canvas id="top-right" width="1200" height="660"></canvas>
-      <canvas id="bottom-left" width="1200" height="660"></canvas>
-      <canvas id="bottom-right" width="1200" height="660"></canvas>
+      <div id="top-left-container">
+        <canvas id="top-left" width="1200" height="660"></canvas>
+        <input type="button" class="reset-view" value="Reset view"/>
+      </div>
+      <div id="top-right-container" data-k-axis="z">
+        <canvas id="top-right" width="1200" height="660"></canvas>
+        <input type="button" class="reset-view" value="Reset view"/>
+      </div>
+      <div id="bottom-left-container" data-k-axis="x">
+        <canvas id="bottom-left" width="1200" height="660"></canvas>
+        <input type="button" class="reset-view" value="Reset view"/>
+      </div>
+      <div id="bottom-right-container" data-k-axis="y">
+        <canvas id="bottom-right" width="1200" height="660"></canvas>
+        <input type="button" class="reset-view" value="Reset view"/>
+      </div>
     </div>
     <div id="controls">
       <a id="author" rel="author" href="https://github.com/jarrett">Voxel Planner by jarrett</a>

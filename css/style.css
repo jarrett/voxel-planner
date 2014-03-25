@@ -7,7 +7,9 @@ a:link, a:visited, a:hover, a:active {color: #4277B3; text-decoration: underline
 a:hover, a:active {text-decoration: none;}
 
 div#canvases {float: left; width: 1202px; border: 1px solid #d0d0d0;}
-canvas {float: left; background: white; width: 600px; height: 330px;}
+div#canvases > div {float: left; position: relative;}
+div#canvases input {position: absolute; z-index: 1; top: 0; left: 0;}
+canvas {background: white; width: 600px; height: 330px;}
 canvas#top-left {border-right: 2px solid #d0d0d0; border-bottom: 2px solid #d0d0d0;}
 canvas#bottom-left {border-right: 2px solid #d0d0d0;}
 canvas#top-right {border-bottom: 2px solid #d0d0d0;}
@@ -15,7 +17,7 @@ canvas#top-right {border-bottom: 2px solid #d0d0d0;}
 div#controls {float: left; margin-left: 20px;}
 input[type=button] {
   display: inline-block; border: 1px solid #bbbbbb; text-align: center; cursor: pointer;
-  background: #e3e3e3; padding: 2px 0 3px 0; outline: none; text-shadow: 0 1px 0 #fff;
+  background: #e3e3e3; padding: 2px 4px 3px 4px; outline: none; text-shadow: 0 1px 0 #fff;
   -webkit-box-shadow: inset 0 0 1px 1px #f6f6f6; -moz-box-shadow: inset 0 0 1px 1px #f6f6f6;
   box-shadow: inset 0 0 1px 1px #f6f6f6; -webkit-border-radius: 3px; -moz-border-radius: 3px;
   border-radius: 3px; font-size: 12px; font-family: "Lucida Grande", "Helvetica", "Arial", sans-serif;

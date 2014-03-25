@@ -11,70 +11,64 @@ function bufferBackground(gl, bgAttribBuffer) {
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-function drawBackground(gl, bgAttribBuffer, bgProgram, bgAttribIndices, panI, panJ, zoom) {
+function drawBackground(gl, bgAttribBuffer, bgProgram, bgAttribIndices, viewport) {
   gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-  
   gl.useProgram(bgProgram);
-  
   gl.bindBuffer(gl.ARRAY_BUFFER, bgAttribBuffer);
-  
-  gl.uniform1f(bgAttribIndices.uPanI, panI);
-  gl.uniform1f(bgAttribIndices.uPanJ, panJ);
-  gl.uniform1f(bgAttribIndices.uZoom, zoom);
-  gl.uniform1i(bgAttribIndices.uViewportW, gl.drawingBufferWidth);
-  gl.uniform1i(bgAttribIndices.uViewportH, gl.drawingBufferHeight);
-  
+  set2dUniforms(gl, bgAttribIndices, viewport);
   gl.enableVertexAttribArray(bgAttribIndices.aPosition);
   gl.vertexAttribPointer(bgAttribIndices.aPosition, 2, gl.FLOAT, false, 0, 0);
-  
   gl.drawArrays(gl.TRIANGLES, 0, 6);
-  
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-// When the registered events fire, the viewport object is updated. redrawFn is a callback
-// that will be called any time an event requires the viewport to be redrawn.
-function init2dViewportEvents(canvas, viewport, redrawFn) {
-  canvas = $(canvas);
-  canvas.bind('mousewheel DOMMouseScroll', function(event) {
-    if (event.originalEvent.wheelDelta > 0 || event.originalEvent.detail < 0) {
-      viewport.zoom *= 1.03;
-    }
-    else {
-      viewport.zoom /= 1.03;
-    }
-    event.preventDefault();
-    redrawFn();
+// Call this after drawBackground so gl.viewport has already been called. The foreground
+// will always render in front because the background vertex shader draws everything at
+// z = 0.5. The foreground vertex shader draws everything at z = 0;
+function drawForeground(gl, fgProgram, fgAttribIndices, viewport, slice) {
+  gl.useProgram(fgProgram);
+  gl.bindBuffer(gl.ARRAY_BUFFER, slice.attribBuffer);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, slice.indexBuffer);
+  
+  set2dUniforms(gl, fgAttribIndices, viewport);
+  gl.enableVertexAttribArray(fgAttribIndices.aPosition);
+  gl.vertexAttribPointer(fgAttribIndices.aPosition, 2, gl.FLOAT, false, 0, 0);
+  
+  gl.drawElements(gl.TRIANGLES, slice.vertexCount, gl.UNSIGNED_SHORT, 0);
+  
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+function init2dModelListeners(gl, model, slice, redraw) {
+  model.addBlockListener(function(model, x, y, z, blockId) {
+    slice.rebuffer(gl, model);
+    redraw();
   });
-  var mouseMoveHandler = $.throttle(16, function(event) {
-    viewport.panI += (event.pageX - viewport.lastMouseI) * 0.01;
-    viewport.panJ -= (event.pageY - viewport.lastMouseJ) * 0.01;
-    viewport.lastMouseI = event.pageX;
-    viewport.lastMouseJ = event.pageY;
-    redrawFn();
+  
+  model.addLoadListener(function(model) {
+    slice.rebuffer(gl, model);
+    redraw();
   });
-  canvas.mousedown(function(event) {
-    if (event.shiftKey) {
-      viewport.lastMouseI = event.pageX;
-      viewport.lastMouseJ = event.pageY;
-      $(window).mousemove(mouseMoveHandler);
-      function mouseUpHandler() {
-        $(window).unbind('mousemove', mouseMoveHandler);
-        $(window).unbind('mouseup', mouseUpHandler);
-        delete viewport.lastMouseI;
-        delete viewport.lastMouseJ;
-      }
-      $(window).mouseup(mouseUpHandler);
-    }
+  
+  model.addResizeListener(function(model, w, d, h) {
+    redraw();
   });
 }
 
 function init2dViewport(canvas) {
-  var viewport = {panI: 0, panJ: 0, zoom: 0.1};
+  var viewport = {
+    panI: 0,
+    panJ: 0,
+    zoom: 0.1,
+    depth: 0
+  };
   
   var gl = initGl(canvas);
   gl.clearColor(1.0, 1.0, 1.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  
+  // Grid background
   
   var bgVertexShader = compileShader(gl, 'grid-bg-vertex', gl.VERTEX_SHADER);
   var bgFragmentShader = compileShader(gl, 'grid-bg-fragment', gl.FRAGMENT_SHADER);
@@ -93,11 +87,43 @@ function init2dViewport(canvas) {
   var bgAttribBuffer = gl.createBuffer();
   bufferBackground(gl, bgAttribBuffer);
   
+  // Foreground
+  
+  var fgVertexShader = compileShader(gl, '2d-vertex', gl.VERTEX_SHADER);
+  var fgFragmentShader = compileShader(gl, '2d-fragment', gl.FRAGMENT_SHADER);
+
+  var fgProgram = createProgram(gl, fgVertexShader, fgFragmentShader);
+  gl.useProgram(fgProgram);
+  var fgAttribIndices = {
+    aPosition:  safeGetAttribLocation( gl, fgProgram, 'aPosition'),
+    uPanI:      safeGetUniformLocation(gl, fgProgram, 'uPanI'),
+    uPanJ:      safeGetUniformLocation(gl, fgProgram, 'uPanJ'),
+    uZoom:      safeGetUniformLocation(gl, fgProgram, 'uZoom'),
+    uViewportW: safeGetUniformLocation(gl, fgProgram, 'uViewportW'),
+    uViewportH: safeGetUniformLocation(gl, fgProgram, 'uViewportH')
+  }
+  
+  var kAxis = $(canvas).closest('div').attr('data-k-axis');
+  var slice = new Slice(kAxis, 0);
+  slice.rebuffer(gl, Model.current);
+  
+  // Events and drawing
+  
   function redraw() {
-    drawBackground(gl, bgAttribBuffer, bgProgram, bgAttribIndices, viewport.panI, viewport.panJ, viewport.zoom);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    drawBackground(gl, bgAttribBuffer, bgProgram, bgAttribIndices, viewport);
+    drawForeground(gl, fgProgram, fgAttribIndices, viewport, slice);
   }
   
   init2dViewportEvents(canvas, viewport, redraw);
   
-  redraw();
+  init2dModelListeners(gl, Model.current, slice, redraw);
+}
+
+function set2dUniforms(gl, attribIndices, viewport) {
+  gl.uniform1f(attribIndices.uPanI, viewport.panI);
+  gl.uniform1f(attribIndices.uPanJ, viewport.panJ);
+  gl.uniform1f(attribIndices.uZoom, viewport.zoom);
+  gl.uniform1i(attribIndices.uViewportW, gl.drawingBufferWidth);
+  gl.uniform1i(attribIndices.uViewportH, gl.drawingBufferHeight);
 }

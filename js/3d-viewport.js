@@ -1,8 +1,9 @@
-function drawAxes(gl, program, attribIndices, attribBuffer, camera) {
+function drawAxes(gl, program, attribIndices, attribBuffer, projection, view) {
   gl.useProgram(program);
   gl.bindBuffer(gl.ARRAY_BUFFER, attribBuffer);
   
-  gl.uniformMatrix4fv(attribIndices.uCamera, false, camera);
+  gl.uniformMatrix4fv(attribIndices.uProjection, false, projection);
+  gl.uniformMatrix4fv(attribIndices.uView, false, view);
   
   gl.enableVertexAttribArray(attribIndices.aPosition);
   gl.vertexAttribPointer(attribIndices.aPosition, 3, gl.FLOAT, false, 24, 0);
@@ -14,26 +15,51 @@ function drawAxes(gl, program, attribIndices, attribBuffer, camera) {
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
 }
 
-function draw3dViewport(gl, program, attribIndices, viewport, chunks) {
+function draw3dViewport(gl, program, attribIndices, viewport, projection, chunks) {
   gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
   gl.clearColor(1.0, 1.0, 1.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   
-  var camera = mat4.create();
-  mat4.perspective(camera, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1024);
-  mat4.translate(camera, camera, [-1 * viewport.camX, -1 * viewport.camY, -1 * viewport.camZ]);
-  mat4.rotateX(camera, camera, viewport.camTilt);
+  var view = viewMatrix3d(viewport);
   
   gl.useProgram(program);
   for (var x in chunks) {
     for (var y in chunks[x]) {
       for (var z in chunks[x][y]) {
-        chunks[x][y][z].draw(gl, attribIndices, camera);
+        chunks[x][y][z].draw(gl, attribIndices, projection, view);
       }
     }
   }
   
-  drawAxes(gl, viewport.axes.program, viewport.axes.attribIndices, viewport.axes.attribBuffer, camera);
+  drawAxes(gl, viewport.axes.program, viewport.axes.attribIndices, viewport.axes.attribBuffer, projection, view);
+}
+
+function init3dModelListeners(gl, model, chunks, redraw) {  
+  model.addBlockListener(function(model, x, y, z, blockId) {
+    // The chunk will rebuffer in its entirety, using the references to the GL context
+    // and the model that we pass in. We can ignore the blockId param.
+    var chunk = Chunk.ensureExistsAtCoord(chunks, x, y, z);
+    chunk.rebuffer(gl, model);
+    
+    redraw();
+  });
+  
+  model.addLoadListener(function(model) {
+    for (var z = 0; z < model.height; z+= 12) {
+      for (var y = 0; y < model.depth; y+= 12) { 
+        for (var x = 0; x < model.width; x += 12) {
+          var chunk = Chunk.ensureExistsAtCoord(chunks, x, y, z);
+          chunk.rebuffer(gl, model);
+        }
+      }
+    }
+    
+    redraw();
+  });
+  
+  model.addResizeListener(function(model, w, d, h) {
+    redraw();
+  });
 }
 
 function init3dViewport() {
@@ -53,38 +79,44 @@ function init3dViewport() {
   gl.useProgram(program);
   
   var attribIndices = {
-    aPosition: safeGetAttribLocation( gl, program, 'aPosition'),
-    aNormal:   safeGetAttribLocation( gl, program, 'aNormal'),
-    uCamera:   safeGetUniformLocation(gl, program, 'uCamera')
+    aPosition:   safeGetAttribLocation( gl, program, 'aPosition'),
+    aNormal:     safeGetAttribLocation( gl, program, 'aNormal'),
+    uProjection: safeGetUniformLocation(gl, program, 'uProjection'),
+    uView:       safeGetUniformLocation(gl, program, 'uView'),
   };
   
   var viewport = {
-    camX: 0,
-    camY: 0,
-    camZ: 7,
+    camX: -7,
+    camY: -7,
+    camZ: 10,
     
-    camPan: Math.PI / 8,
-    camTilt: 0,
-    axes: initAxes(gl)
+    camPan: Math.PI / 4,
+    camTilt: -0.6,
+    axes: init3dAxes(gl)
   };
+  
+  var projection = mat4.create();
+  mat4.perspective(projection, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1024);
   
   // See Chunk.atCoord for a description of this object's format.
   var chunks = {};
   
+  function redraw() {
+    draw3dViewport(gl, program, attribIndices, viewport, projection, chunks);
+  }
+  
   // Later, we may want to do something more sophisticated than storing the current
   // model in a static variable.
-  initModelListeners(gl, program, attribIndices, viewport, Model.current, chunks);
+  //init3dModelListeners(gl, program, attribIndices, viewport, projection, Model.current, chunks);
+  init3dModelListeners(gl, Model.current, chunks, redraw);
   
-  init3dViewportEvents(canvas, viewport, function() {
-    draw3dViewport(gl, program, attribIndices, viewport, chunks);
-  });
-  
-  /*setInterval(function() {
-    draw3dViewport(gl, program, attribIndices, viewport, chunks);
-  }, 1000);*/
+  /*init3dViewportEvents(canvas, viewport, function() {
+    draw3dViewport(gl, program, attribIndices, viewport, projection, chunks);
+  });*/
+  init3dViewportEvents(canvas, viewport, redraw);
 }
 
-function initAxes(gl) {
+function init3dAxes(gl) {
   var attribBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, attribBuffer);
   gl.bufferData(
@@ -92,13 +124,13 @@ function initAxes(gl) {
     new Float32Array([
       // Position       // Color
       0.0, 0.0, 0.0,    1.0, 0.0, 0.0,
-      10.0, 0.0, 0.0,    1.0, 0.0, 0.0,
+      5.0, 0.0, 0.0,    1.0, 0.0, 0.0,
       
       0.0, 0.0, 0.0,    0.0, 1.0, 0.0,
-      0.0, 10.0, 0.0,    0.0, 1.0, 0.0,
+      0.0, 5.0, 0.0,    0.0, 1.0, 0.0,
       
       0.0, 0.0, 0.0,    0.0, 0.0, 1.0,
-      0.0, 0.0, 10.0,    0.0, 0.0, 1.0,
+      0.0, 0.0, 5.0,    0.0, 0.0, 1.0,
     ]),
     gl.STATIC_DRAW
   );
@@ -113,36 +145,31 @@ function initAxes(gl) {
     program:       program,
     attribBuffer:  attribBuffer,
     attribIndices: {
-      aPosition:    safeGetAttribLocation( gl, program, 'aPosition'),
-      aColor:       safeGetAttribLocation( gl, program, 'aColor'),
-      uCamera:      safeGetUniformLocation(gl, program, 'uCamera')
+      aPosition:   safeGetAttribLocation( gl, program, 'aPosition'),
+      aColor:      safeGetAttribLocation( gl, program, 'aColor'),
+      uProjection: safeGetUniformLocation(gl, program, 'uProjection'),
+      uView:       safeGetUniformLocation(gl, program, 'uView')
     }
   };
 }
 
-function initModelListeners(gl, program, attribIndices, viewport, model, chunks) {
-  model.addBlockListener(function(model, x, y, z, blockId) {
-    // The chunk will rebuffer in its entirety, using the references to the GL context
-    // and the model that we pass in. We can ignore the blockId param.
-    var chunk = Chunk.ensureExistsAtCoord(chunks, x, y, z);
-    chunk.rebuffer(gl, model);
-    
-    draw3dViewport(gl, program, attribIndices, viewport, chunks);
-  });
-  
-  model.addLoadListener(function(model) {
-    for (var z = 0; z < model.height; z+= 12) {
-      for (var y = 0; y < model.depth; y+= 12) { 
-        for (var x = 0; x < model.width; x += 12) {
-          var chunk = Chunk.ensureExistsAtCoord(chunks, x, y, z);
-          chunk.rebuffer(gl, model);
-        }
-      }
-    }
-    draw3dViewport(gl, program, attribIndices, viewport, chunks);
-  });
-  
-  model.addResizeListener(function(model, w, d, h) {
-    draw3dViewport(gl, program, attribIndices, viewport, chunks);
-  });
+function viewMatrix3d(viewport) {
+  var camDir = [
+    Math.cos(viewport.camPan) * Math.cos(viewport.camTilt),
+    Math.sin(viewport.camPan) * Math.cos(viewport.camTilt),
+    Math.sin(viewport.camTilt)
+  ];
+  var camTarget = [
+    camDir[0] + viewport.camX,
+    camDir[1] + viewport.camY,
+    camDir[2] + viewport.camZ
+  ];
+  var view = mat4.create();
+  mat4.lookAt(
+    view,
+    [viewport.camX, viewport.camY, viewport.camZ],
+    camTarget,
+    [0, 0, 1]
+  );
+  return view;
 }

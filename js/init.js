@@ -1,12 +1,12 @@
 $(document).ready(function() {
-  /*init2dViewport($('canvas#top-right').get()[0]);
-  init2dViewport($('canvas#bottom-left').get()[0]);
-  init2dViewport($('canvas#bottom-right').get()[0]);*/
-  
   // This is a hacky way to initialize the model. But it'll do for version zero.
   Model.current = Model.current = new Model(6, 6, 6);
   
-  init3dViewport();
+  init2dViewport($('canvas#top-right').get()[0]);
+  //init2dViewport($('canvas#bottom-left').get()[0]);
+  //init2dViewport($('canvas#bottom-right').get()[0]);
+  
+  //init3dViewport();
   
   // This is a hacky way to initialize the model. But it'll do for version zero.
   var defaultModel = [
