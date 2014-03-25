@@ -40,14 +40,18 @@ function drawForeground(gl, fgProgram, fgAttribIndices, viewport, slice) {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 }
 
-function init2dModelListeners(gl, model, slice, redraw) {
+function init2dModelListeners(gl, model, slices, redraw) {
   model.addBlockListener(function(model, x, y, z, blockId) {
-    slice.rebuffer(gl, model);
+    _.each(slices, function(slice) {
+      slice.rebuffer(gl, model);
+    });
     redraw();
   });
   
   model.addLoadListener(function(model) {
-    slice.rebuffer(gl, model);
+    _.each(slices, function(slice) {
+      slice.rebuffer(gl, model);
+    });
     redraw();
   });
   
@@ -104,20 +108,20 @@ function init2dViewport(canvas) {
   }
   
   var kAxis = $(canvas).closest('div').attr('data-k-axis');
-  var slice = new Slice(kAxis, 0);
-  slice.rebuffer(gl, Model.current);
+  var slice0 = new Slice(kAxis, 0);
+  slice0.rebuffer(gl, Model.current);
   
   // Events and drawing
   
   function redraw() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     drawBackground(gl, bgAttribBuffer, bgProgram, bgAttribIndices, viewport);
-    drawForeground(gl, fgProgram, fgAttribIndices, viewport, slice);
+    drawForeground(gl, fgProgram, fgAttribIndices, viewport, slice0);
   }
   
   init2dViewportEvents(canvas, viewport, redraw);
   
-  init2dModelListeners(gl, Model.current, slice, redraw);
+  init2dModelListeners(gl, Model.current, [slice0], redraw);
 }
 
 function set2dUniforms(gl, attribIndices, viewport) {
