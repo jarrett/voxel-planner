@@ -46,26 +46,27 @@ function init2dViewportEvents(canvas, viewport, redrawFn) {
     event.preventDefault();
     redrawFn();
   });
+  var mouseMoveHandler = $.throttle(16, function(event) {
+    viewport.panI += (event.pageX - viewport.lastMouseI) * 0.01;
+    viewport.panJ -= (event.pageY - viewport.lastMouseJ) * 0.01;
+    viewport.lastMouseI = event.pageX;
+    viewport.lastMouseJ = event.pageY;
+    redrawFn();
+  });
   canvas.mousedown(function(event) {
     if (event.shiftKey) {
       viewport.lastMouseI = event.pageX;
       viewport.lastMouseJ = event.pageY;
-      var mouseMoveHandler = $.throttle(16, function(event) {
-        viewport.panI += (event.pageX - viewport.lastMouseI) * 0.01;
-        viewport.panJ -= (event.pageY - viewport.lastMouseJ) * 0.01;
-        viewport.lastMouseI = event.pageX;
-        viewport.lastMouseJ = event.pageY;
-        redrawFn();
-      });
       $(window).mousemove(mouseMoveHandler);
-      $(window).mouseup(function() {
+      function mouseUpHandler() {
         $(window).unbind('mousemove', mouseMoveHandler);
+        $(window).unbind('mouseup', mouseUpHandler);
         delete viewport.lastMouseI;
         delete viewport.lastMouseJ;
-      });
+      }
+      $(window).mouseup(mouseUpHandler);
     }
   });
-  
 }
 
 function init2dViewport(canvas) {

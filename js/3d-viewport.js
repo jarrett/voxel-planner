@@ -22,11 +22,7 @@ function draw3dViewport(gl, program, attribIndices, viewport, chunks) {
   var camera = mat4.create();
   mat4.perspective(camera, 45, gl.drawingBufferWidth / gl.drawingBufferHeight, 0.1, 1024);
   mat4.translate(camera, camera, [-1 * viewport.camX, -1 * viewport.camY, -1 * viewport.camZ]);
-  // In OpenGL's clip space, the Z axis is normal to the screen. But in our coordinate
-  // system, we prefer to refer to a camera looking along (x, y, 0) as having tilt 0.
-  // Therefore, we must convert between those two coordinate systems.
-  mat4.rotateZ(camera, camera, viewport.camPan);
-  mat4.rotateX(camera, camera, viewport.camTilt + (Math.PI / 2));
+  mat4.rotateX(camera, camera, viewport.camTilt);
   
   gl.useProgram(program);
   for (var x in chunks) {
@@ -63,10 +59,11 @@ function init3dViewport() {
   };
   
   var viewport = {
-    camX: 2,
-    camY: 2,
-    camZ: 10,
-    camPan: 0,
+    camX: 0,
+    camY: 0,
+    camZ: 7,
+    
+    camPan: Math.PI / 8,
     camTilt: 0,
     axes: initAxes(gl)
   };
@@ -85,34 +82,6 @@ function init3dViewport() {
   /*setInterval(function() {
     draw3dViewport(gl, program, attribIndices, viewport, chunks);
   }, 1000);*/
-}
-
-function init3dViewportEvents(canvas, viewport, redrawFn) {
-  var canvas = $(canvas);
-  var mouseX;
-  var mouseY;
-  $(window).mousemove($.throttle(32, function(event) {
-    mouseX = event.pageX;
-    mouseY = event.pageY;
-  }));
-  $(window).keydown(function(event) {
-    var offset = canvas.offset()
-    if (
-      mouseX >= offset.left && mouseX <= offset.left + canvas.width() &&
-      mouseY >= offset.top && mouseY <= offset.top + canvas.height()
-    ) {
-      switch (event.keycode) {
-      case 87: // w
-        break;
-      case 83: // s
-        break;
-      case 65: // a
-        break;
-      case 68: // d
-        break;
-      }
-    }
-  });
 }
 
 function initAxes(gl) {
