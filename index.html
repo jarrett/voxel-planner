@@ -4,6 +4,7 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="js/jquery.ba-throttle-debounce.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script type="text/javascript" src="/js/base64.js"></script>
     <script type="text/javascript" src="/js/gl-matrix.js"></script>
     <script type="text/javascript" src="/js/model.js"></script>
     <script type="text/javascript" src="/js/chunk.js"></script>
@@ -15,6 +16,7 @@
     <script type="text/javascript" src="/js/2d-viewports.js"></script>
     <script type="text/javascript" src="/js/2d-viewport-events.js"></script>
     <script type="text/javascript" src="/js/palette.js"></script>
+    <script type="text/javascript" src="/js/saving.js"></script>
     <script type="text/javascript" src="/js/init.js"></script>
     
     <link type="text/css" rel="stylesheet" href="/css/style.css"/>
@@ -28,25 +30,52 @@
       <div id="top-right-container" data-k-axis="z">
         <canvas id="top-right" width="1200" height="660"></canvas>
         <input type="button" class="reset-view" value="Reset view"/>
-        <div class="k"></div>
+        <div class="k">
+          <label for="top-right-k">Depth:</label>
+          <input id="top-right-k" type="text" class="k"/>
+          <input type="button" class="plus-k" value="+"/>
+          <input type="button" class="minus-k" value="-"/>
+        </div>
       </div>
       <div id="bottom-left-container" data-k-axis="x">
         <canvas id="bottom-left" width="1200" height="660"></canvas>
         <input type="button" class="reset-view" value="Reset view"/>
-        <div class="k"></div>
+        <div class="k">
+          <label for="bottom-left-k">Depth:</label>
+          <input id="bottom-left-k" type="text" class="k"/>
+          <input type="button" class="plus-k" value="+"/>
+          <input type="button" class="minus-k" value="-"/>
+        </div>
       </div>
       <div id="bottom-right-container" data-k-axis="y">
         <canvas id="bottom-right" width="1200" height="660"></canvas>
         <input type="button" class="reset-view" value="Reset view"/>
-        <div class="k"></div>
+        <div class="k">
+          <label for="bottom-right-k">Depth:</label>
+          <input id="bottom-right-k" type="text" class="k"/>
+          <input type="button" class="plus-k" value="+"/>
+          <input type="button" class="minus-k" value="-"/>
+        </div>
       </div>
     </div>
     <div id="controls">
       <a id="author" rel="author" href="https://github.com/jarrett">Voxel Planner by jarrett</a>
       <ul id="palette">
       </ul>
-      <input type="button" id="add-color" value="+"/>
-      <input type="button" id="delete-color" value="-"/>
+      <div id="palette-controls">
+        <input type="button" id="add-color" value="+"/>
+        <input type="button" id="delete-color" value="-"/>
+      </div>
+      <div id="load-save-controls">
+        <input type="button" id="save" value="Save"/>
+      </div>
+      <img src="/img/voxel-logo.png" width="126" height="84" alt="Logo" id="logo"/>
+    </div>
+    <div id="save-dialog" style="display:none;">
+      <a download="model.txt" id="download-link">Right click this link and choose "save as."</a>
+      <small>If your browser asks you to pick a filename, you can call it anything
+      you want. The extension doesn't matter, but .txt is recommended.</small>
+      <a href="#" id="close-save-dialog">Close</a>
     </div>
   </body>
 </html>

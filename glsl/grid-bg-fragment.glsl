@@ -23,12 +23,14 @@ void main() {
       distJ = 1.0 - distJ;
     }
     float minDist = min(distI, distJ);  
-    gl_FragColor = mix( 
+    /*gl_FragColor = mix( 
       vec4(0.85, 0.85, 0.85, 1.0), // Line color
       vec4(1.0, 1.0, 1.0, 1.0), // Background color
-      smoothstep(0.0, 0.003 / uZoom, minDist)
-    );
+      smoothstep(0.0, 0.03 / uZoom, minDist)
+    );*/
+    float opacity = 1.0 - smoothstep(0.0, 0.003 / uZoom, minDist);
+    gl_FragColor = vec4(0.2, 0.2, 0.2, opacity);
   } else {
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 0.0);
   }
 }

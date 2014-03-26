@@ -1,7 +1,9 @@
-// When the registered events fire, the viewport object is updated. redrawFn is a callback
-// that will be called any time an event requires the viewport to be redrawn.
-function init2dViewportEvents(canvas, viewport, model, kAxis, redrawFn) {
+// When the registered events fire, the viewport object is updated. redraw is a callback
+// that will be called any time an event requires the viewport to be redrawn. initSlices
+// is a callback that will be called when the viewport's current slices need to be updated.
+function init2dViewportEvents(canvas, viewport, model, kAxis, redraw, initSlices) {
   canvas = $(canvas);
+  var container = canvas.closest('div');
   
   // Zooming
   canvas.bind('mousewheel DOMMouseScroll', $.throttle(16, function(event) {
@@ -19,7 +21,7 @@ function init2dViewportEvents(canvas, viewport, model, kAxis, redrawFn) {
       }
     }
     
-    redrawFn();
+    redraw();
   }));
   
   // Panning
@@ -28,7 +30,7 @@ function init2dViewportEvents(canvas, viewport, model, kAxis, redrawFn) {
     viewport.panJ += (event.pageY - viewport.lastMouseJ) * 0.01;
     viewport.lastMouseI = event.pageX;
     viewport.lastMouseJ = event.pageY;
-    redrawFn();
+    redraw();
   });
   
   canvas.mousedown(function(event) {
@@ -49,19 +51,48 @@ function init2dViewportEvents(canvas, viewport, model, kAxis, redrawFn) {
   });
   
   // Reset view
-  canvas.closest('div').find('input.reset-view').click(function() {
+  container.find('input.reset-view').click(function() {
     viewport.panI = 0;
     viewport.panJ = 0;
     viewport.zoom = 0.1;
     viewport.k = 0;
-    redrawFn();
+    redraw();
   });
   
   // Changing k values
   function updateKDisplay() {
-    canvas.closest('div').find('.k').html('Depth: ' + viewport.k);
+    container.find('input.k').val(viewport.k);
   }
   updateKDisplay();
+  
+  function kTextFieldChange() {
+    var newK = parseInt(container.find('input.k').val());
+    if (!isNaN(newK)) {
+      viewport.k = newK;
+      initSlices();
+      redraw();
+    }
+  }
+  container.find('input.k').keyup(kTextFieldChange);
+  
+  function overK(fn) {
+    var field = container.find('input.k');
+    var currentK = parseInt(field.val());
+    if (isNaN(currentK)) {
+      field.val(0);
+    } else {
+      field.val(fn(currentK));
+    }
+    kTextFieldChange();
+  }
+  container.find('input.plus-k').click(function() {
+    overK(function(k) { return k + 1; });
+  });
+  container.find('input.minus-k').click(function() {
+    overK(function(k) {
+      return (k - 1 < 0) ? k : k - 1;
+    });
+  });
   
   // Drawing
   function worldCoordsFromClick(event) {
@@ -80,20 +111,22 @@ function init2dViewportEvents(canvas, viewport, model, kAxis, redrawFn) {
   }
   
   function setBlock(i, j, blockId) {
-    if (kAxis == 'x') {
-      var y = i;
-      var z = j;
-      var x = viewport.k;
-    } else if (kAxis == 'y') {
-      var x = i;
-      var z = j;
-      var y = viewport.k;
-    } else {
-      var x = i;
-      var y = j;
-      var z = viewport.k;
+    if (i >= 0 && j >= 0) {
+      if (kAxis == 'x') {
+        var y = i;
+        var z = j;
+        var x = viewport.k;
+      } else if (kAxis == 'y') {
+        var x = i;
+        var z = j;
+        var y = viewport.k;
+      } else {
+        var x = i;
+        var y = j;
+        var z = viewport.k;
+      }
+      model.setBlock(x, y, z, blockId);
     }
-    model.setBlock(x, y, z, blockId);
   }
   
   function leftClick(event) {

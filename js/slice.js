@@ -16,6 +16,11 @@ function Slice(kAxis, k) {
   }
 }
 
+Slice.prototype.free = function(gl) {
+  if (this.attribBuffer) { gl.deleteBuffer(this.attribBuffer); }
+  if (this.indexBuffer) { gl.deleteBuffer(this.indexBuffer); }
+}
+
 Slice.prototype.modelDim = function(model, axis) {
   if (axis == 'x') { return model.width; }
   if (axis == 'y') { return model.depth; }

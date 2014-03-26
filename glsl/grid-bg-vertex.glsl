@@ -13,7 +13,7 @@ attribute vec2 aPosition;
 varying vec2 vPosition;
 
 void main() {
-  gl_Position = vec4(aPosition, 0.5, 1.0);
+  gl_Position = vec4(aPosition, -0.5, 1.0);
   
   float aspect = float(uViewportW) / float(uViewportH);
   // Convert clip space to world space. The inverse of the world-to-screen transform.

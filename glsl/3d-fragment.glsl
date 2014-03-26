@@ -16,5 +16,5 @@ void main() {
     max(0.0, dot(light2Pos, vNormal)) * 0.7 +
     max(0.0, dot(light3Pos, vNormal)) * 0.7
   );
-  gl_FragColor = vec4(lambert * vec3(0.5, 0.8, 1.0), 1.0);
+  gl_FragColor = vec4(lambert * vec3(0.67, 0.82, 1.0), 1.0);
 }

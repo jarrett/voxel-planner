@@ -3,19 +3,9 @@ body {
   font-family: "Lucida Grande", "Helvetica", "Arial", sans-serif;
 }
 
-a:link, a:visited, a:hover, a:active {color: #4277B3; text-decoration: underline;}
+a:link, a:visited, a:hover, a:active {color: #1c62b6; text-decoration: underline;}
 a:hover, a:active {text-decoration: none;}
 
-div#canvases {float: left; width: 1202px; border: 1px solid #d0d0d0;}
-div#canvases > div {float: left; width: 600px; position: relative; height: 330px;}
-div#canvases input {position: absolute; z-index: 1; top: 0; left: 0;}
-div#canvases div.k {position: absolute; z-index: 1; top: 5px; left: 80px; color: #909090; font-size: 13px;}
-canvas {background: white; width: 600px; height: 330px; margin: 0; padding: 0;}
-div#top-left-container {border-right: 2px solid #d0d0d0; border-bottom: 2px solid #d0d0d0;}
-div#bottom-left-container {border-right: 2px solid #d0d0d0;}
-div#top-right-container {border-bottom: 2px solid #d0d0d0;}
-
-div#controls {float: left; margin-left: 20px;}
 input[type=button] {
   display: inline-block; border: 1px solid #bbbbbb; text-align: center; cursor: pointer;
   background: #e3e3e3; padding: 2px 4px 3px 4px; outline: none; text-shadow: 0 1px 0 #fff;
@@ -23,7 +13,30 @@ input[type=button] {
   box-shadow: inset 0 0 1px 1px #f6f6f6; -webkit-border-radius: 3px; -moz-border-radius: 3px;
   border-radius: 3px; font-size: 12px; font-family: "Lucida Grande", "Helvetica", "Arial", sans-serif;
 }
+
+div#canvases {float: left; width: 1202px; border: 1px solid #d0d0d0;}
+div#canvases > div {float: left; width: 600px; position: relative; height: 330px;}
+div#canvases input.reset-view {position: absolute; z-index: 1; top: 0; left: 0;}
+
+div#canvases div.k {position: absolute; z-index: 1; top: 3px; left: 80px;}
+div#canvases div.k label, div#canvases div.k input[type=text] {
+  color: #909090; font-size: 12px; padding: 0; margin: 0; border: none; background: none;
+}
+div#canvases div.k input[type=text] {width: 24px; padding: 1px;}
+div#canvases div.k input[type=text]:focus {outline: none; border: 1px solid #d0d0d0; padding: 0;}
+div#canvases div.k input[type=button] {
+  height: 15px; width: 17px; padding: 0 0 2px 0; font-size: 10px; position: relative; top: -1px;
+}
+
+canvas {background: white; width: 600px; height: 330px; margin: 0; padding: 0;}
+div#top-left-container {border-right: 2px solid #d0d0d0; border-bottom: 2px solid #d0d0d0;}
+div#bottom-left-container {border-right: 2px solid #d0d0d0;}
+div#top-right-container {border-bottom: 2px solid #d0d0d0;}
+
+div#controls {float: left; margin-left: 20px; width: 126px; height: 664px; position: relative;}
+
 a#author {font-size: 11px; margin: 0 0 10px 0; display: block;}
+
 ul#palette {
   list-style-type: none; margin: 0 0 5px 0; padding: 0 0 5px 0; overflow: hidden;
   border-bottom: 1px solid #d8d8d8;
@@ -36,4 +49,18 @@ ul#palette li div {
   width: 20px; height: 20px; border: 2px solid white;
   -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;
 }
-#add-color, #delete-color {width: 22px;}
+input#add-color, input#delete-color {width: 22px;}
+
+div#load-save-controls {padding: 7px 0 0 0; margin: 5px 0 0 0; border-top: 1px solid #d8d8d8;}
+input#save {margin: 0;}
+div#save-dialog {
+  position: absolute; top: 100px; left: 50%; padding: 20px; margin-left: -220px; width: 400px;
+  background: white; z-index: 2; text-align: center; border: 1px solid #d0d0d0;
+}
+div#save-dialog a#download-link {display: block; font-size: 17px;}
+div#save-dialog small {
+  display: block; font-size: 12px; line-height: 17px; color: #404040; margin: 10px 0;
+}
+div#save-dialog a#close-save-dialog {font-size: 13px;}
+
+img#logo {position: absolute; bottom: 0; left: 0;}
