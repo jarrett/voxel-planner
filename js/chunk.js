@@ -68,7 +68,6 @@ Chunk.ensureExistsAtCoord = function(chunks, x, y, z) {
   return chunks[mX][mY][mZ];
 }
 
-
 // Be sure to clear, set the viewport, and use the shader program before calling this.
 Chunk.prototype.draw = function(gl, attribIndices, projection, view) {
   if (!this.attribBuffer || !this.indexBuffer) {
@@ -93,6 +92,17 @@ Chunk.prototype.draw = function(gl, attribIndices, projection, view) {
   
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+}
+
+Chunk.atCoord = function(chunks, x, y, z) {
+  var mX = Chunk.minimum(x);
+  var mY = Chunk.minimum(y);
+  var mZ = Chunk.minimum(z);
+  if (chunks[mX] && chunks[mX][mY] && chunks[mX][mY][mZ]) {
+    return chunks[mX][mY][mZ];
+  } else {
+    return null;
+  }
 }
 
 Chunk.minimum = function(coord) {

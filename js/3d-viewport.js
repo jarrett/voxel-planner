@@ -41,6 +41,41 @@ function init3dModelListeners(gl, model, chunks, redraw) {
     var chunk = Chunk.ensureExistsAtCoord(chunks, x, y, z);
     chunk.rebuffer(gl, model);
     
+    // Rebuffer the adjacent chunk if the block is on the edge of a chunk.
+    if (x % 12 == 0) {
+      adjChunk = Chunk.atCoord(chunks, x - 1, y, z);
+      if (adjChunk) {
+        adjChunk.rebuffer(gl, model);
+      }
+    } else if (x % 12 == 11) {
+      adjChunk = Chunk.atCoord(chunks, x + 1, y, z);
+      if (adjChunk) {
+        adjChunk.rebuffer(gl, model);
+      }
+    }
+    if (y % 12 == 0) {
+      adjChunk = Chunk.atCoord(chunks, x, y - 1, z);
+      if (adjChunk) {
+        adjChunk.rebuffer(gl, model);
+      }
+    } else if (y % 12 == 11) {
+      adjChunk = Chunk.atCoord(chunks, x, y + 1, z);
+      if (adjChunk) {
+        adjChunk.rebuffer(gl, model);
+      }
+    }
+    if (z % 12 == 0) {
+      adjChunk = Chunk.atCoord(chunks, x, y, z - 1);
+      if (adjChunk) {
+        adjChunk.rebuffer(gl, model);
+      }
+    } else if (z % 12 == 11) {
+      adjChunk = Chunk.atCoord(chunks, x, y, z + 1);
+      if (adjChunk) {
+        adjChunk.rebuffer(gl, model);
+      }
+    }
+    
     redraw();
   });
   

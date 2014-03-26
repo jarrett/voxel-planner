@@ -1,6 +1,6 @@
 $(document).ready(function() {
   // This is a hacky way to initialize the model. But it'll do for version zero.
-  Model.current = Model.current = new Model(6, 6, 6);
+  Model.current = Model.current = new Model(3, 3, 3);
   
   init2dViewport($('canvas#top-right').get()[0]);
   init2dViewport($('canvas#bottom-left').get()[0]);

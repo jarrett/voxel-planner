@@ -7,12 +7,13 @@ a:link, a:visited, a:hover, a:active {color: #4277B3; text-decoration: underline
 a:hover, a:active {text-decoration: none;}
 
 div#canvases {float: left; width: 1202px; border: 1px solid #d0d0d0;}
-div#canvases > div {float: left; position: relative;}
+div#canvases > div {float: left; width: 600px; position: relative; height: 330px;}
 div#canvases input {position: absolute; z-index: 1; top: 0; left: 0;}
-canvas {background: white; width: 600px; height: 330px;}
-canvas#top-left {border-right: 2px solid #d0d0d0; border-bottom: 2px solid #d0d0d0;}
-canvas#bottom-left {border-right: 2px solid #d0d0d0;}
-canvas#top-right {border-bottom: 2px solid #d0d0d0;}
+div#canvases div.k {position: absolute; z-index: 1; top: 5px; left: 80px; color: #909090; font-size: 13px;}
+canvas {background: white; width: 600px; height: 330px; margin: 0; padding: 0;}
+div#top-left-container {border-right: 2px solid #d0d0d0; border-bottom: 2px solid #d0d0d0;}
+div#bottom-left-container {border-right: 2px solid #d0d0d0;}
+div#top-right-container {border-bottom: 2px solid #d0d0d0;}
 
 div#controls {float: left; margin-left: 20px;}
 input[type=button] {

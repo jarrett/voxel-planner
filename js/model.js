@@ -50,8 +50,13 @@ Model.prototype.hasBlock = function(x, y, z) {
   }
 }
 
-Model.prototype.offsetAt = function(x, y, z) {
-  return (z * this.width * this.depth) + (y * this.width) + x;
+Model.prototype.offsetAt = function(x, y, z, options) {
+  if (typeof(options) == 'undefined') { options = {}; }
+  if (options.size) {
+    return (z * options.size.width * options.size.depth) + (y * options.size.width) + x;
+  } else {
+    return (z * this.width * this.depth) + (y * this.width) + x;
+  }
 }
 
 // This function can accept coordinates outside the boundaries of the model, in which
@@ -75,11 +80,13 @@ Model.prototype.getBlock = function(x, y, z) {
   }
 }
 
-Model.prototype.initTypedArray = function() {
-  this.blocks = new Uint16Array(this.width * this.depth * this.height);
-  /*for (var i = 0; i < this.blocks.length; i++) {
-    this.blocks[i] = 0;
-  }*/
+Model.prototype.initTypedArray = function(options) {
+  if (typeof(options) == 'undefined') { options = {}; }
+  if (options.size) {
+    this.blocks = new Uint16Array(options.size.width * options.size.depth * options.size.height);
+  } else {
+    this.blocks = new Uint16Array(this.width * this.depth * this.height);
+  }
 }
 
 Model.prototype.setBlock = function(x, y, z, blockId, options) {
@@ -87,7 +94,37 @@ Model.prototype.setBlock = function(x, y, z, blockId, options) {
   if (x < 0) { throw('Coords must not be negative. X was ' + x); }
   if (y < 0) { throw('Coords must not be negative. Y was ' + y); }
   if (z < 0) { throw('Coords must not be negative. Z was ' + z); }
+  
+  // Expand the typed array if necessary.
+  if (x >= this.width || y >= this.depth || z >= this.height) {
+    var newWidth = this.width;
+    var newDepth = this.depth;
+    var newHeight = this.height;
+    if (x >= this.width) { newWidth = x + 1; }
+    if (y >= this.depth) { newDepth = y + 1; }
+    if (z >= this.height) { newHeight = z + 1; }
+    var sizeOptions = {size: {width: newWidth, depth: newDepth, height: newHeight}};
+    var tempBlocks = this.blocks;
+    this.initTypedArray(sizeOptions);
+    for (var iz = 0; iz < this.height; iz++) {
+      for (var iy = 0; iy < this.depth; iy++) {
+        for (var ix = 0; ix < this.width; ix++) {
+          var oldOffset = this.offsetAt(ix, iy, iz);
+          var oldBlockId = tempBlocks[oldOffset];
+          var newOffset = this.offsetAt(ix, iy, iz, sizeOptions);
+          this.blocks.set([oldBlockId], newOffset);
+        }
+      }
+    }
+    this.width = newWidth;
+    this.depth = newDepth;
+    this.height = newHeight;
+  }
+  // Set the new value in the typed array.
   var offset = this.offsetAt(x, y, z);
+  if (offset >= this.blocks.length) {
+    throw('Tried to set block at ' + offset + ' but length of typed array was ' + this.blocks.length);
+  }
   this.blocks.set([blockId], offset);
   // If we're processing a batch update, e.g. when loading from a file, we can tell
   // setBlock not to trigger the block listener callbacks on every block update. In that

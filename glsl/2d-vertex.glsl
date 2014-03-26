@@ -19,8 +19,8 @@ void main() {
   // blocks. To make the blocks line up with the grid, they must be shifted by 0.5.
   float aspect = float(uViewportW) / float(uViewportH);
   gl_Position = vec4(
-    ((aPosition.x - 0.5) / aspect) * uZoom - uPanI,
-    (aPosition.y - 0.5) * uZoom - uPanJ,
+    ((aPosition.x + 0.5) / aspect) * uZoom - uPanI,
+    (aPosition.y + 0.5) * uZoom - uPanJ,
     0.0, 1.0
   );
 }

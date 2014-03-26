@@ -65,7 +65,7 @@ function init2dViewport(canvas) {
     panI: 0,
     panJ: 0,
     zoom: 0.1,
-    depth: 0
+    k: 0
   };
   
   var gl = initGl(canvas);
@@ -119,7 +119,7 @@ function init2dViewport(canvas) {
     drawForeground(gl, fgProgram, fgAttribIndices, viewport, slice0);
   }
   
-  init2dViewportEvents(canvas, viewport, redraw);
+  init2dViewportEvents(canvas, viewport, Model.current, kAxis, redraw);
   
   init2dModelListeners(gl, Model.current, [slice0], redraw);
 }
