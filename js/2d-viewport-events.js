@@ -53,4 +53,30 @@ function init2dViewportEvents(canvas, viewport, redrawFn) {
     viewport.zoom = 0.1;
     redrawFn();
   });
+  
+  // Drawing
+  function leftClick(event) {
+    var offset = canvas.offset();
+    var i = event.pageX - offset.left;
+    var j = event.pageY - offset.top;
+    
+  }
+  
+  function rightClick(event) {
+    var offset = canvas.offset();
+    var i = event.pageX - offset.left;
+    var j = event.pageY - offset.top;
+  }
+  canvas.bind('contextmenu', function(event) {
+    event.preventDefault();
+    rightClick(event);
+  });
+  canvas.click(function(event) {
+    if (event.which == 1) {
+      leftClick(event);
+    } else if (event.which == 2) {
+      // Right mouse
+      rightClick(event);
+    }
+  });
 }

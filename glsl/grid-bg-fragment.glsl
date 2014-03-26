@@ -1,46 +1,30 @@
 precision mediump float;
 
-uniform float uPanI;
+/*uniform float uPanI;
 uniform float uPanJ;
 uniform float uZoom;
 uniform int uViewportW;
-uniform int uViewportH;
+uniform int uViewportH;*/
+uniform float uZoom;
 
+// In world coords
 varying vec2 vPosition;
 
-void main() {
-  float aspect = float(uViewportW) / float(uViewportH);
-  // At zoom 1.0, the viewport is two squares tall.
-  float gridSize = uZoom * 1.0;
-  
-  // Calculate adjusted I and J coordinates for this fragment, taking into account
-  // pan and aspect ratio.
-  float adjI = (vPosition.x * aspect) - uPanI;
-  float adjJ = vPosition.y - uPanJ;
-  
+void main() {  
   // Calculate distance to nearest grid line.
-  float distI = mod(adjI, gridSize);
-  if (distI > gridSize / 2.0) {
-    distI = gridSize - distI;
+  float distI = mod(vPosition.x, 1.0);
+  if (distI > 0.5) {
+    distI = 1.0 - distI;
   }
-  float distJ = mod(adjJ, gridSize);
-  if (distJ > gridSize / 2.0) {
-    distJ = gridSize - distJ;
+  float distJ = mod(vPosition.y, 1.0);
+  if (distJ > 0.5) {
+    distJ = 1.0 - distJ;
   }
   float minDist = min(distI, distJ);
   
   gl_FragColor = mix( 
     vec4(0.85, 0.85, 0.85, 1.0), // Line color
     vec4(1.0, 1.0, 1.0, 1.0), // Background color
-    smoothstep(0.0, 0.005, minDist)
-  );
-  
-  gl_FragColor = mix(
-    vec4(1.0, 0.0, 0.0, 1.0),
-    gl_FragColor,
-    smoothstep(0.0, 0.05, distance(
-      vPosition,
-      vec2(0.0, 0.0)
-    ))
+    smoothstep(0.0, 0.003 / uZoom, minDist)
   );
 }
