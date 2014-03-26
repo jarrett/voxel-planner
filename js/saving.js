@@ -1,5 +1,6 @@
 function modelToDataUri(model) {
-  return 'data:[application/octet-stream],' + arrayBufferToBase64(model.blocks.buffer);
+  // TODO: Prepend width, depth, and height. Will require constructing a new ArrayBuffer.
+  return 'data:application/octet-stream;base64,' + arrayBufferToBase64(model.blocks.buffer);
 }
 
 function initSaving() {

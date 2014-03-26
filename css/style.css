@@ -63,4 +63,6 @@ div#save-dialog small {
 }
 div#save-dialog a#close-save-dialog {font-size: 13px;}
 
+div#controls-desc p {margin: 10px 0; font-size: 10px; line-height: 14px; color: #404040;}
+
 img#logo {position: absolute; bottom: 0; left: 0;}
