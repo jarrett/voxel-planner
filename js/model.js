@@ -69,7 +69,7 @@ Model.prototype.getBlock = function(x, y, z) {
     return 0;
   } else {
     var offset = this.offsetAt(x, y, z);
-    var blockId = this.blocks[offset];
+    var blockId = this.blocks.getUint16(offset * 2);
     if (typeof(blockId) == 'undefined') {
       throw(
         'getBlock(' + x + ', ' + y + ', ' + z + '): Outside boundaries. w: ' + this.width +
@@ -83,10 +83,13 @@ Model.prototype.getBlock = function(x, y, z) {
 Model.prototype.initTypedArray = function(options) {
   if (typeof(options) == 'undefined') { options = {}; }
   if (options.size) {
-    this.blocks = new Uint16Array(options.size.width * options.size.depth * options.size.height);
+    this.blocksBuffer = new ArrayBuffer(2 * options.size.width * options.size.depth * options.size.height);
+    //this.blocks = new Uint16Array(options.size.width * options.size.depth * options.size.height);
   } else {
-    this.blocks = new Uint16Array(this.width * this.depth * this.height);
+    this.blocksBuffer = new ArrayBuffer(2 * this.width * this.depth * this.height);
+    //this.blocks = new Uint16Array(this.width * this.depth * this.height);
   }
+  this.blocks = new DataView(this.blocksBuffer);
 }
 
 Model.prototype.setBlock = function(x, y, z, blockId, options) {
@@ -110,9 +113,9 @@ Model.prototype.setBlock = function(x, y, z, blockId, options) {
       for (var iy = 0; iy < this.depth; iy++) {
         for (var ix = 0; ix < this.width; ix++) {
           var oldOffset = this.offsetAt(ix, iy, iz);
-          var oldBlockId = tempBlocks[oldOffset];
+          var oldBlockId = tempBlocks.getUint16(2 * oldOffset);
           var newOffset = this.offsetAt(ix, iy, iz, sizeOptions);
-          this.blocks.set([oldBlockId], newOffset);
+          this.blocks.setUint16(2 * newOffset, oldBlockId);
         }
       }
     }
@@ -125,7 +128,7 @@ Model.prototype.setBlock = function(x, y, z, blockId, options) {
   if (offset >= this.blocks.length) {
     throw('Tried to set block at ' + offset + ' but length of typed array was ' + this.blocks.length);
   }
-  this.blocks.set([blockId], offset);
+  this.blocks.setUint16(2 * offset, blockId);
   // If we're processing a batch update, e.g. when loading from a file, we can tell
   // setBlock not to trigger the block listener callbacks on every block update. In that
   // case, we must be sure to call doneLoading on the model.
