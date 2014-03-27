@@ -17,6 +17,7 @@
     <script type="text/javascript" src="/js/2d-viewport-events.js"></script>
     <script type="text/javascript" src="/js/palette.js"></script>
     <script type="text/javascript" src="/js/saving.js"></script>
+    <script type="text/javascript" src="/js/loading.js"></script>
     <script type="text/javascript" src="/js/init.js"></script>
     
     <link type="text/css" rel="stylesheet" href="/css/style.css"/>
@@ -70,6 +71,7 @@
       </div>
       <div id="load-save-controls">
         <input type="button" id="save" value="Save"/>
+        <input type="button" id="load" value="Load"/>
       </div>      
       <div id="controls-desc">
         <p>In the 3d window, move with WASD, space, and shift.
@@ -84,7 +86,11 @@
       <a download="model.txt" id="download-link">Right click this link and choose "save as."</a>
       <small>If your browser asks you to pick a filename, you can call it anything
       you want. The extension doesn't matter, but .txt is recommended.</small>
-      <a href="#" id="close-save-dialog">Close</a>
-    </div>    
+      <a href="#" class="close">Close</a>
+    </div>
+    <div id="load-dialog" style="display:none;">
+      <input type="file"/>
+      <a href="#" class="close">Close</a>
+    </div>
   </body>
 </html>
