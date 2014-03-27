@@ -4,6 +4,9 @@ function modelToDataUri(model) {
   
   // Set the dimensions using a DataView, which ensures big endianness.
   var view = new DataView(newBuff);
+  console.log(model.width);
+  console.log(model.depth);
+  console.log(model.height);
   view.setUint16(0, model.width);
   view.setUint16(2, model.depth);
   view.setUint16(0, model.height);
@@ -14,14 +17,14 @@ function modelToDataUri(model) {
   dst16.set(src16);
   
   // Encode as a base64 data URI.
-  return 'data:application/octet-stream;base64,' + arrayBufferToBase64(model.blocks.buffer);
+  return 'data:application/octet-stream;base64,' + arrayBufferToBase64(newBuff);
 }
 
 function initSaving() {
   $('input#save').click(function() {
     $('div#save-dialog').show().find('a#download-link').attr('href', modelToDataUri(Model.current));
   });
-  $('div#save-dialog a#close-save-dialog').click(function() {
+  $('div#save-dialog a.close').click(function() {
     $('div#save-dialog').hide();
   });
 }
