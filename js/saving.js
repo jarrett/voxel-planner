@@ -9,7 +9,7 @@ function modelToDataUri(model) {
   console.log(model.height);
   view.setUint16(0, model.width);
   view.setUint16(2, model.depth);
-  view.setUint16(0, model.height);
+  view.setUint16(4, model.height);
   
   // Copy the original buffer into the new one by creating a Uint16 view of each.
   var src16 = new Uint16Array(model.blocks.buffer);
